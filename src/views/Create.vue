@@ -1,6 +1,6 @@
 <template>
   <div class="create">
-      <form>
+      <form @submit.prevent="handleSubmit">
           <label>Title:</label>
           <input v-model="title" type="text" required>
           <label>Content:</label>
@@ -19,12 +19,17 @@
 
 <script>
 import { ref } from '@vue/reactivity'
+import { useRouter } from 'vue-router'
+
 export default {
     setup(){
         const title = ref('')
         const body = ref('')
         const tag = ref('')
         const tags = ref([])
+
+        const router = useRouter()
+        // console.log(router);
 
         const handleKeydown = () => {
             if(!tags.value.includes(tag.value)){
@@ -34,12 +39,29 @@ export default {
             tag.value = ''
         }
 
+        const handleSubmit = async () => {
+          const post = {
+            title: title.value,
+            body: body.value,
+            tags: tags.value
+          }
+
+          await fetch('http://localhost:3000/posts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json'},
+            body: JSON.stringify(post)
+          })
+
+          router.push({ name: 'Home' })
+        }
+
         return{
             title,
             body,
             tag,
             tags,
-            handleKeydown
+            handleKeydown,
+            handleSubmit
         }
     }
 }
